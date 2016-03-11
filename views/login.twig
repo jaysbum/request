@@ -1,0 +1,35 @@
+{% extends 'layout.twig' %}
+{% block content %}
+      <form class="form-signin" method="post">
+        <h2 class="form-signin-heading"><i class="fa fa-lock"></i> เข้าสู่ระบบจัดการ</h2>
+        <label for="loginUser" class="sr-only">หน่วยขึ้นตรง</label>
+        <select class="form-control" name="loginUser" id="loginUser" required>
+	        {% for u in units %}
+	        <option value="{{ u.id }}">{{ u.name }}</option>
+	        {% endfor %}
+        </select>
+        <div style="height: 10px;"></div>
+        <label for="txtPassword" class="sr-only">รหัสผ่าน</label>
+        <input type="password" id="txtPassword" name="txtPassword" class="form-control" placeholder="รหัสผ่าน" required>
+        <div style="height: 10px;"></div>
+        <button class="btn btn-lg btn-primary btn-block" type="submit"><i class="fa fa-sign-in"></i> เข้าสู่ระบบ</button>
+      </form>
+{% endblock %}
+{% block style %}
+<style>
+body {
+  padding-top: 180px;
+  padding-bottom: 40px;
+  background-image: url('../assets/images/bg.jpg');
+  background-size:     cover;                     
+  background-repeat:   no-repeat;
+  background-position: center center;
+}
+
+.form-signin {
+  max-width: 330px;
+  padding: 15px;
+  margin: 0 auto;
+}
+</style>
+{% endblock %}

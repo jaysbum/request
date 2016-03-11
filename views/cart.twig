@@ -1,0 +1,166 @@
+{% extends 'layout.twig' %}
+{% block content %}
+				<div class="x_content">
+				<h1><i class="fa fa-shopping-cart"></i> รายการพัสดุที่เลือก</h1>
+				{% if action == "overLimit" %}
+				<div class="x_content bs-example-popovers">
+                <div class="alert alert-danger alert-dismissible fade in" role="alert">
+                  <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span>
+                  </button>
+                  ยอดเงินรวมเกินวงเงินอนุมัติ กรุณาเลือกทำรายการใหม่
+                </div>
+				</div>
+				{% elseif action == "updated" %}
+				<div class="x_content bs-example-popovers">
+                <div class="alert alert-warning alert-dismissible fade in" role="alert">
+                  <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span>
+                  </button>
+                  แก้ไขรายการ <strong>{{ name }}</strong> จำนวน <strong>{{ quantity }}</strong> {{ count }} เรียบร้อยแล้ว.
+                </div>
+				</div>
+				{% endif %}
+                  <table id="example" class="table table-striped responsive-utilities jambo_table">
+                    <thead>
+                      <tr class="headings">
+	                    <th>หมายเลขพัสดุ </th>
+                        <th>ชื่อพัสดุ </th>
+                        <th>หน่วยนับ </th>
+                        <th>ราคาต่อหน่วย </th>
+                        <th>จำนวนที่ต้องการ </th>
+                        <th>ราคารวม</th>
+                        <th></th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+	                  {% if session.cart_items|length == 0 %}
+	                  <tr>
+		                  <td colspan="7">ไม่มีรายการพัสดุที่เลือก</td>
+	                  </tr>
+	                  {% endif %}
+	                  {% set total = 0 %}
+	                  {% set budget = 15000 %}
+	                  {% for i in items %}
+                      <tr>
+	                      <td>
+		                      <div class="product-id" style="display:none;">{{ i.id }}</div>
+		                      <div class="product-nsn">{{ i.nsn }}</div>
+		                  </td>
+		                  <td><div class="product-name">{{ i.name }}</div></td>
+		                  <td><div class="product-count-unit">{{ i.count_unit }}</div></td>
+		                  <td><div class="product-price">{{ i.price }}</div></td>
+		                  <td style="width:200px;">
+			                  <form class="update-quantity-form">
+				                  <div class="input-group">
+					                  <input type="number" name="quantity" value="{{ session.cart_items[i.id] }}" min="1" class="form-control" placeholder="Type quantity here...">
+					                  <span class="input-group-btn">
+					                  <button type="submit" class="btn btn-success add-to-cart">
+					                  <span class="glyphicon glyphicon-pencil"></span> แก้ไข</button></span>
+					               </div>
+					          </form>
+					       </td>
+					       <td>
+						       {% set total = total + (session.cart_items[i.id] * i.price) %}
+						       {{ session.cart_items[i.id] * i.price }}
+					       </td>
+						   <td>
+						<div class="modal fade" id="deleteModal-{{ i.id }}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                        <h4 class="modal-title" id="myModalLabel">แจ้งเตือนการลบข้อมูล</h4>
+                      </div>
+                      <div class="modal-body">
+                        คุณยืนยันต้องการจะลบรายการ {{ i.name }} จำนวน {{ session.cart_items[i.id] }} {{ i.count_unit }} ออกจากรายการที่เลือกไว้ ใช่หรือไม่?
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-info" data-dismiss="modal">ไม่ใช่</button>
+                        <button type="button" class="btn btn-danger" onclick="window.location.href='removeCart.php?id={{ i.id }}'">ใช่ ยืนยันการลบข้อมูล</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+							   <button class="btn btn-danger btn-small" data-toggle="modal" data-target="#deleteModal-{{ i.id }}"><i class="fa fa-fw fa-trash"></i> ลบออก</a>
+						   </td>
+					   </tr>
+                      {% endfor %}
+                    </tbody>
+                    <tfoot>
+	                    <tr>
+	                    <td colspan="5" style="text-align: right"><strong>ยอดรวมทั้งหมด :</strong></td>
+	                    <td colspan="2"><strong><font color="blue">{{ allTotal }}</font></strong></td>
+	                    </tr>
+	                    <tr>
+	                    <td colspan="5" style="text-align: right"><strong>งบอนุมัติ :</strong></td>
+	                    <td colspan="2">
+	                    <form name="submitForm" id="submitForm" method="post" action="saveRequest.php">
+	                    {% if session.budget1_exist == true and session.budget2_exist == true %}
+	                    		บันทึกข้อมูลทั้ง 2 งวดเรียบร้อย
+	                    {% else %}
+		                    <select class="form-control" name="budgetSelect">
+		                    		{% if session.budget1_exist == false %}
+			                    <option value="1">งวดที่ 1 - {{ session.budget1 }}</option>
+			                    {% endif %}
+			                    {% if session.budget2_exist == false %}
+			                    <option value="2">งวดที่ 2 - {{ session.budget2 }}</option>
+			                    {% endif %}
+		                    </select>
+		                {% endif %}
+	                    </form>
+	                    </td>
+	                    </tr>
+	                    <tr>
+	                    <td colspan="5" style="text-align: right"><strong>ยอดเงินคงเหลือ :</strong></td>
+	                    <td colspan="2"><strong><font color="green">{{ session.budget1 - total }}</font></strong></td>
+	                    </tr>
+	                    <tr>
+	                    <td colspan="5">
+	                    		<a href="dashboard.php" class="btn btn-info"><< กลับไปทำรายการเลือกพัสดุ</a>
+	                    </td>
+	                    <td colspan="2">
+	                    		<button class="btn btn-success" data-toggle="modal" data-target="#confirmRequest" {% if session.budget1_exist == true and session.budget2_exist == true or session.cart_items is not defined or session.cart_items|length == 0 %}disabled{% endif %}><i class="fa fa-fw fa-save"></i> บันทึกข้อมูล</button>
+	                    </td>
+	                    </tr>
+                    </tfoot>
+                  </table>
+                  <div class="modal fade" id="confirmRequest" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                        <h4 class="modal-title" id="myModalLabel">ยืนยันการบันทึกข้อมูล</h4>
+                      </div>
+                      <div class="modal-body">
+                        ท่านต้องการจะส่งข้อมูลทั้งหมดนี้ ใช่หรือใม่ ? <br> หากยังไม่แน่ใจกรุณากด "ยกเลิก" แล้วกลับไปตรวจสอบการเลือกรายการใหม่อีกครั้ง ถ้าหากท่านกดที่ปุ่ม "ยืนยัน" แล้วท่านจะไม่สามารถแก้ไขข้อมูลของท่านได้.
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-info" data-dismiss="modal">ยกเลิก</button>
+                        <button type="button" class="btn btn-danger" id="btnSubmit">ใช่ ยืนยันการบันทึกข้อมูล</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+</div>
+{% endblock %}
+{% block script %}
+<script>
+$(document).ready(function(){
+	$('.update-quantity-form').on('submit', function(){
+		var id = $(this).closest('tr').find('.product-id').text();
+		var name = $(this).closest('tr').find('.product-name').text();
+		var quantity = $(this).closest('tr').find('input').val();
+		var count = $(this).closest('tr').find('.product-count-unit').text();
+		var price = $(this).closest('tr').find('.product-price').text();
+		window.location.href = "updateCart.php?id=" + id + "&name=" + name + "&quantity=" + quantity + "&from=cart&page={{ page }}&count=" + count + "&price=" + price;
+		return false;
+	});
+	$(".alert").delay(1000).slideUp(700, function() {
+    		$(this).alert('close');
+	});
+	$('#btnSubmit').click(function(){
+    		$('#submitForm').submit();
+	});
+});
+</script>
+{% endblock %}

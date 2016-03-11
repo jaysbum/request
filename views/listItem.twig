@@ -1,0 +1,232 @@
+{% extends 'layout.twig' %}
+{% block content %}
+				<div class="row">
+				<div class="col-md-8">
+				<h1><i class="fa fa-list"></i> รายการพัสดุทั้งหมด</h1>
+				</div>
+				<div class="col-md-4" style="text-align:right;margin-top:25px;">
+				<button class="btn btn-success" {% if session.budget1_exist == true and session.budget2_exist == true or session.cart_items is not defined or session.cart_items|length == 0 %}disabled{% endif %} onclick="window.location.href='cart.php'">>> ไปยังขั้นตอนบันทึกข้อมูล</button>
+				</div>
+				</div>
+				<div class="row" style="margin-left:5px;">
+				<div class="col-md-{% if session.budget1_exist == false and session.budget2_exist == false %}6{% else %}9{% endif %}">
+					<div class="row">
+						<ul id="pagination" class="pagination-sm"></ul>
+					</div>
+					<div class="row">
+					<form name="searchForm" action="dashboard.php" method="post">
+						<div class="input-group">
+					      <input type="text" class="form-control" name="txtSearch" placeholder="ค้นหาจากชื่อพัสดุ...">
+					      <span class="input-group-btn">
+					        <button class="btn btn-default" type="submit">ค้นหา</button>
+					      </span>
+					    </div>
+					</form>
+					</div>
+				</div>
+				{% if session.budget1_exist == true and session.budget2_exist == true %}
+				<div class="col-md-3">
+					<ul class="list-group">
+					  <li class="list-group-item">
+					    ข้อมูลงบทั้ง 2 งวดเรียบร้อย
+					  </li>
+					</ul>
+				</div>
+				{% endif %}
+				{% if session.budget1_exist == false and session.budget2_exist == false %}
+				<div class="col-md-6">
+				<div class="col-md-6">
+					<ul class="list-group">
+					  <li class="list-group-item">
+					    <span class="badge">{{ session.budget1 }}</span>
+					    ยอดอนุมัติ งวดที่ 1
+					  </li>
+					  <li class="list-group-item">
+					    <span class="badge">{{ total }}</span>
+					    ยอดรวม
+					  </li>
+					  <li class="list-group-item">
+					    <span class="badge">{{ session.budget1 - total }}</span>
+					    ยอดคงเหลือ
+					  </li>
+					</ul>
+				</div>
+				<div class="col-md-6">
+					<ul class="list-group">
+					  <li class="list-group-item">
+					    <span class="badge">{{ session.budget2 }}</span>
+					    ยอดอนุมัติ งวดที่ 2
+					  </li>
+					  <li class="list-group-item">
+					    <span class="badge">{{ total }}</span>
+					    ยอดรวม
+					  </li>
+					  <li class="list-group-item">
+					    <span class="badge">{{ session.budget2 - total }}</span>
+					    ยอดคงเหลือ
+					  </li>
+					</ul>
+				</div>
+				</div>
+				{% endif %}
+				{% if session.budget1_exist == false and session.budget2_exist == true %}
+				<div class="col-md-3">
+					<ul class="list-group">
+					  <li class="list-group-item">
+					    <span class="badge">{{ session.budget1 }}</span>
+					    ยอดอนุมัติ งวดที่ 1
+					  </li>
+					  <li class="list-group-item">
+					    <span class="badge">{{ total }}</span>
+					    ยอดรวม
+					  </li>
+					  <li class="list-group-item">
+					    <span class="badge">{{ session.budget1 - total }}</span>
+					    ยอดคงเหลือ
+					  </li>
+					</ul>
+				</div>
+				{% endif %}
+				{% if session.budget1_exist == true and session.budget2_exist == false %}
+				<div class="col-md-3">
+					<ul class="list-group">
+					  <li class="list-group-item">
+					    <span class="badge">{{ session.budget2 }}</span>
+					    ยอดอนุมัติ งวดที่ 2
+					  </li>
+					  <li class="list-group-item">
+					    <span class="badge">{{ total }}</span>
+					    ยอดรวม
+					  </li>
+					  <li class="list-group-item">
+					    <span class="badge">{{ session.budget2 - total }}</span>
+					    ยอดคงเหลือ
+					  </li>
+					</ul>
+				</div>
+				{% endif %}
+				</div>
+				{% if action is not empty %}
+				{% if action == "added" %}
+				<div class="x_content bs-example-popovers">
+                <div class="alert alert-success alert-dismissible fade in" role="alert">
+                  <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span>
+                  </button>
+                  เพิ่มรายการ <strong>{{ name }}</strong> จำนวน <strong>{{ quantity }}</strong> {{ count }} เรียบร้อยแล้ว.
+                </div>
+				</div>
+				{% elseif action == "overLimit" %}
+				<div class="x_content bs-example-popovers">
+                <div class="alert alert-danger alert-dismissible fade in" role="alert">
+                  <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span>
+                  </button>
+                  ยอดเงินรวมเกินวงเงินอนุมัติ กรุณาเลือกทำรายการใหม่
+                </div>
+				</div>
+				{% elseif action == "updated" %}
+				<div class="x_content bs-example-popovers">
+                <div class="alert alert-warning alert-dismissible fade in" role="alert">
+                  <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span>
+                  </button>
+                  แก้ไขรายการ <strong>{{ name }}</strong> จำนวน <strong>{{ quantity }}</strong> {{ count }} เรียบร้อยแล้ว.
+                </div>
+				</div>
+				{% elseif action == "saved" %}
+				<div class="x_content bs-example-popovers">
+                <div class="alert alert-success alert-dismissible fade in" role="alert">
+                  <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span>
+                  </button>
+                  บันทึกรายการแจ้งความต้องการเรียบร้อยแล้ว.
+                </div>
+				</div>
+				{% endif %}
+				{% endif	 %}
+				<div style="height:10px;"></div>
+				<div class="x_content">
+                  <table id="example" class="table table-striped table-hover">
+                    <thead>
+                      <tr class="headings">
+	                    <th>หมายเลขพัสดุ </th>
+                        <th>ชื่อพัสดุ </th>
+                        <th>หน่วยนับ </th>
+                        <th>ราคาต่อหน่วย </th>
+                        <th>จำนวนที่ต้องการ </th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+	                  {% for i in items %}
+                      <tr>
+	                      <td>
+		                      <div class="product-id" style="display:none;">{{ i.id }}</div>
+		                      <div class="product-nsn">{{ i.nsn }}</div>
+		                  </td>
+		                  <td><div class="product-name">{{ i.name }}</div></td>
+		                  <td style="width:80px;"><div class="product-count-unit">{{ i.count_unit }}</div></td>
+		                  <td style="width:100px;"><div class="product-price">{{ i.price }}</div></td>
+		                  <td style="width:200px;">
+			                  {% if session.cart_items[i.id] is not null %}
+			                  <form class="update-quantity-form">
+				                  <div class="input-group">
+					                  <input type="number" name="quantity" value="{{ session.cart_items[i.id] }}" min="1" class="form-control" placeholder="Type quantity here..." {% if session.budget1_exist == true and session.budget2_exist == true %}disabled{% endif %}>
+					                  <span class="input-group-btn">
+					                  <button type="submit" class="btn btn-success add-to-cart" {% if session.budget1_exist == true and session.budget2_exist == true %}disabled{% endif %}>
+					                  <span class="glyphicon glyphicon-pencil"></span> แก้ไข</button></span>
+					               </div>
+					          </form>
+					          {% else %}
+					          <form class="add-to-cart-form">
+				                  <div class="input-group">
+					                  <input type="number" name="quantity" value="1" min="1" class="form-control" placeholder="Type quantity here..." {% if session.budget1_exist == true and session.budget2_exist == true %}disabled{% endif %}>
+					                  <span class="input-group-btn">
+					                  <button type="submit" class="btn btn-primary add-to-cart" {% if session.budget1_exist == true and session.budget2_exist == true %}disabled{% endif %}>
+					                  <span class="glyphicon glyphicon-shopping-cart"></span> เพิ่ม</button></span>
+					               </div>
+					          </form>
+					          {% endif %}
+					       </td>
+					   </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                  
+</div>
+{% endblock %}
+{% block script %}
+<script>
+$(document).ready(function(){
+	//alert("test");
+	$('.add-to-cart-form').on('submit', function(){
+		var id = $(this).closest('tr').find('.product-id').text();
+		var name = $(this).closest('tr').find('.product-name').text();
+		var count = $(this).closest('tr').find('.product-count-unit').text();
+		var price = $(this).closest('tr').find('.product-price').text();
+		var quantity = $(this).closest('tr').find('input').val();
+		window.location.href = "addCart.php?id=" + id + "&name=" + name + "&quantity=" + quantity + "&page={{ page }}&count=" + count + "&price=" + price;
+		return false;
+	});
+	$(".alert").delay(1000).slideUp(700, function() {
+    		$(this).alert('close');
+	});
+	$('.update-quantity-form').on('submit', function(){
+		var id = $(this).closest('tr').find('.product-id').text();
+		var name = $(this).closest('tr').find('.product-name').text();
+		var count = $(this).closest('tr').find('.product-count-unit').text();
+		var price = $(this).closest('tr').find('.product-price').text();
+		var quantity = $(this).closest('tr').find('input').val();
+		window.location.href = "updateCart.php?id=" + id + "&name=" + name + "&quantity=" + quantity + "&from=list&page={{ page }}&count=" + count + "&price=" + price;
+		return false;
+	});
+	$('#pagination').twbsPagination({
+        totalPages: {{ totalPages }},
+        visiblePages: 10 ,
+        startPage: {{ page }},
+        first: 'หน้าแรก',
+        last: 'หน้าสุดท้าย',
+        prev: 'หน้าที่แล้ว',
+        next: 'หน้าถัดไป',
+        href: '?page={{ '{{' }}number{{ '}}' }}' ,
+    });
+});
+</script>
+{% endblock %}
